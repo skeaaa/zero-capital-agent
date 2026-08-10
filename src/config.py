@@ -29,9 +29,17 @@ class Config:
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     DEBUG_MODE: bool = os.getenv("DEBUG_MODE", "false").lower() == "true"
     
+    # Demo Mode (fallback when API key not available)
+    DEMO_MODE: bool = os.getenv("DEMO_MODE", "true").lower() == "true"
+    
     @classmethod
     def validate(cls) -> bool:
         """Validate configuration."""
-        if not cls.OPENAI_API_KEY:
-            raise ValueError("OPENAI_API_KEY not set in environment variables")
+        if not cls.OPENAI_API_KEY and not cls.DEMO_MODE:
+            raise ValueError("OPENAI_API_KEY not set in environment variables and DEMO_MODE is disabled")
         return True
+    
+    @classmethod
+    def is_demo_mode(cls) -> bool:
+        """Check if running in demo mode."""
+        return not cls.OPENAI_API_KEY and cls.DEMO_MODE
